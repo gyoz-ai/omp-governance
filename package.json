@@ -1,0 +1,15 @@
+{
+  "name": "omp-governance",
+  "version": "1.0.0",
+  "description": "Oh My Pi plugin enforcing session-wide engineering rules: dispatch discipline, comment/test-marker bans, a Cargo.lock guard, and mandatory post-task verification.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gyoz-ai/omp-governance.git"
+  },
+  "omp": {
+    "version": "1.0.0",
+    "description": "Enforces session-wide engineering rules: dispatch discipline, comment/test-marker bans, a Cargo.lock guard, and mandatory post-task verification.",
+    "extensions": ["index.ts"]
+  }
+}

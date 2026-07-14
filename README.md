@@ -21,6 +21,14 @@ All state (whether `memorysearch` has been called, the outstanding `task` call s
 
 ## Install
 
+```sh
+omp plugin install github:gyoz-ai/omp-governance
+```
+
+This runs `bun install` against `~/.omp/plugins`, symlinks the package into `node_modules`, and validates that `index.ts` resolves and exports a plugin factory before enabling it.
+
+### Local development (symlink)
+
 Symlink the repo directory itself into the extensions folder — the loader treats any top-level subdirectory of `~/.omp/agent/extensions/` containing an `index.ts` as one plugin:
 
 ```sh
