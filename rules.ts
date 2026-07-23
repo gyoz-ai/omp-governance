@@ -28,6 +28,25 @@ Shape every reply so a reader with ADHD can act on it, not just read it — work
 Exceptions: explain fully when asked to "explain" or "walk me through" (still no preamble/closer); confirm before a destructive action; on a 3-turn debug spiral, stop iterating and name the assumption that might be wrong; ask one clarifying question on real ambiguity.
 </adhd_output_style>`;
 
+export const STE_TECHNICAL_ENGLISH = `<technical_writing_style>
+When WRITING documentation, READMEs, specs, PR/commit descriptions, or other explanatory prose, follow ASD-STE100 Simplified Technical English (Issue 9, Jan 2025).
+
+1. One word, one meaning. Do not switch between synonyms for the same thing — pick one term and reuse it.
+2. One meaning, one word. Do not use a word for more than one meaning (e.g. do not use "close" as both a verb and an adjective in the same doc).
+3. One verb, one action. Do not bundle two actions into one verb or one sentence.
+4. Active voice. Write "the plugin blocks the call," not "the call is blocked by the plugin."
+5. Imperative mood for instructions. Write "run the command," not "you should run the command."
+6. Present tense by default. Avoid future/conditional tense unless describing a real condition.
+7. Short sentences: procedures/instructions ≤20 words, descriptions ≤25 words. Split longer sentences.
+8. One instruction per sentence. Do not chain multiple steps with "and" or "then."
+9. No subordinate-clause padding. Cut clauses that only add qualification, hedging, or flourish.
+10. No decorative or promotional language. State facts and instructions only.
+11. Keep articles ("a," "the"). Do not drop them for brevity.
+12. No ambiguous pronouns. Repeat the noun instead of "it"/"this"/"that" when the referent is not immediately obvious.
+
+Follows ASD-STE100 Simplified Technical English (Issue 9, Jan 2025).
+</technical_writing_style>`;
+
 export const CHIEF_DELEGATION = `<chief_delegation>
 You are the CHIEF agent. Delegation is mandatory.
 

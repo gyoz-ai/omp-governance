@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { COMMON_RULES, ADHD_OUTPUT_STYLE, CHIEF_DELEGATION, EXECUTOR_CHECKLIST, VERIFICATION_CHECKLIST } from "./rules.ts";
+import { COMMON_RULES, ADHD_OUTPUT_STYLE, STE_TECHNICAL_ENGLISH, CHIEF_DELEGATION, EXECUTOR_CHECKLIST, VERIFICATION_CHECKLIST } from "./rules.ts";
 import { CHIEF_ALLOWED_TOOLS, countCommentLines, BANNED_TEST_MARKERS, editInputPaths, editAddedText, isCodeFile } from "./tool-guards.ts";
 
 export default function (pi) {
@@ -14,7 +14,7 @@ export default function (pi) {
 	});
 
 	pi.on("before_agent_start", async (event, ctx) => {
-		const blocks = [COMMON_RULES, ADHD_OUTPUT_STYLE];
+		const blocks = [COMMON_RULES, ADHD_OUTPUT_STYLE, STE_TECHNICAL_ENGLISH];
 		if (ctx.hasUI) {
 			blocks.push(CHIEF_DELEGATION);
 		} else {
