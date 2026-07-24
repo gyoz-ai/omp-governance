@@ -106,7 +106,18 @@ export default function (pi) {
 		}
 	});
 
-	pi.on("tool_result", async (event) => {
+	pi.on("tool_result", async (event, ctx) => {
+		if (event.toolName === "write") {
+			let t = "";
+			for (const c of event.content ?? []) {
+				if (c?.type === "text") t += c.text;
+			}
+			if (t.includes("Plan finalized (status=final)")) {
+				const sid = ctx?.sessionManager?.getSessionId?.();
+				if (sid) sessionPhase.set(sid, "executing");
+			}
+			return;
+		}
 		if (event.toolName !== "task") return;
 		const idx = taskStack.findIndex((f) => f.toolCallId === event.toolCallId);
 		if (idx === -1) return;

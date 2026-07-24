@@ -98,12 +98,12 @@ test("subagent receives the finalized plan in its system prompt", async () => {
 	expect(injected).toBe(true);
 });
 
-test("hub is blocked for the chief", async () => {
+test("hub is allowed for the chief", async () => {
 	globalThis.fetch = reachableFetch;
 	const h = makePlugin();
 	await h.session_start({}, chiefCtx);
 	const r = await h.tool_call({ toolName: "hub", input: {} }, chiefCtx);
-	expect(r?.block).toBe(true);
+	expect(r).toBeUndefined();
 });
 
 test("batch task dispatch honors per-item agents during planning", async () => {
@@ -126,4 +126,13 @@ test("chief write to xd://memorysearch is allowed and satisfies rule #8", async 
 	sessionPhase.set("sess-gate", "executing");
 	const t = await h.tool_call({ toolName: "task", toolCallId: "x1", input: { agent: "task" } }, chiefCtx);
 	expect(t).toBeUndefined();
+});
+
+test("finalize result via xd://plan write flips the phase to executing", async () => {
+	globalThis.fetch = reachableFetch;
+	const h = makePlugin();
+	await h.session_start({}, chiefCtx);
+	expect(sessionPhase.get("sess-gate")).toBe("planning");
+	await h.tool_result({ toolName: "write", content: [{ type: "text", text: "Plan finalized (status=final). Planning phase closed." }] }, chiefCtx);
+	expect(sessionPhase.get("sess-gate")).toBe("executing");
 });
