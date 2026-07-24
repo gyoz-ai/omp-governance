@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { COMMON_RULES, ADHD_OUTPUT_STYLE, STE_TECHNICAL_ENGLISH, CHIEF_DELEGATION, EXECUTOR_CHECKLIST, VERIFICATION_CHECKLIST } from "./rules.ts";
+import { COMMON_RULES, ADHD_OUTPUT_STYLE, STE_TECHNICAL_ENGLISH, TUI_CODEBLOCKS, CHIEF_DELEGATION, EXECUTOR_CHECKLIST, VERIFICATION_CHECKLIST } from "./rules.ts";
 import { CHIEF_ALLOWED_TOOLS, sessionPhase, countCommentLines, BANNED_TEST_MARKERS, editInputPaths, editAddedText, isCodeFile } from "./tool-guards.ts";
 import { typesenseFetch, sanitizeProject, PLAN_COLLECTION, PLAN_SCHEMA } from "./plan-tool.ts";
 
@@ -30,7 +30,7 @@ export default function (pi) {
 	});
 
 	pi.on("before_agent_start", async (event, ctx) => {
-		const blocks = [COMMON_RULES, ADHD_OUTPUT_STYLE, STE_TECHNICAL_ENGLISH];
+		const blocks = [COMMON_RULES, ADHD_OUTPUT_STYLE, STE_TECHNICAL_ENGLISH, TUI_CODEBLOCKS];
 		if (ctx.hasUI) {
 			blocks.push(CHIEF_DELEGATION);
 			if (planFirstDisabled) blocks.push("<plan_first_status>\nWARNING: the plan store (Typesense) is unreachable. Plan-first enforcement is DISABLED for this session. You may dispatch executor agents directly. Start the plan-store container to restore plan-first gating.\n</plan_first_status>");
