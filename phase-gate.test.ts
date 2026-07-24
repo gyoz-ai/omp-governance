@@ -97,3 +97,33 @@ test("subagent receives the finalized plan in its system prompt", async () => {
 	const injected = res.systemPrompt.some((b) => b.includes("execution_plan") && b.includes("THE FINAL PLAN BODY"));
 	expect(injected).toBe(true);
 });
+
+test("hub is blocked for the chief", async () => {
+	globalThis.fetch = reachableFetch;
+	const h = makePlugin();
+	await h.session_start({}, chiefCtx);
+	const r = await h.tool_call({ toolName: "hub", input: {} }, chiefCtx);
+	expect(r?.block).toBe(true);
+});
+
+test("batch task dispatch honors per-item agents during planning", async () => {
+	globalThis.fetch = reachableFetch;
+	const h = makePlugin();
+	await h.session_start({}, chiefCtx);
+	await h.tool_call({ toolName: "memorysearch", input: {} }, chiefCtx);
+	const scouts = await h.tool_call({ toolName: "task", toolCallId: "b1", input: { tasks: [{ agent: "scout" }, { agent: "librarian" }] } }, chiefCtx);
+	expect(scouts).toBeUndefined();
+	const mixed = await h.tool_call({ toolName: "task", toolCallId: "b2", input: { tasks: [{ agent: "scout" }, {}] } }, chiefCtx);
+	expect(mixed?.block).toBe(true);
+});
+
+test("chief write to xd://memorysearch is allowed and satisfies rule #8", async () => {
+	globalThis.fetch = reachableFetch;
+	const h = makePlugin();
+	await h.session_start({}, chiefCtx);
+	const w = await h.tool_call({ toolName: "write", input: { path: "xd://memorysearch", content: "{}" } }, chiefCtx);
+	expect(w).toBeUndefined();
+	sessionPhase.set("sess-gate", "executing");
+	const t = await h.tool_call({ toolName: "task", toolCallId: "x1", input: { agent: "task" } }, chiefCtx);
+	expect(t).toBeUndefined();
+});

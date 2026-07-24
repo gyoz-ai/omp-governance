@@ -27,10 +27,9 @@ afterEach(() => {
 	globalThis.fetch = realFetch;
 });
 
-test("plan tool is hidden from subagents (no UI)", () => {
+test("plan tool is exposed regardless of UI so the loader mounts it", () => {
 	const t = factory({ hasUI: false, cwd: "/x", zod: zStub });
-	expect(Array.isArray(t)).toBe(true);
-	expect(t.length).toBe(0);
+	expect(t.name).toBe("plan");
 });
 
 test("plan tool is exposed to the chief (UI)", () => {

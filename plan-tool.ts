@@ -29,7 +29,6 @@ export function sanitizeProject(dir) {
 }
 
 const factory = (pi) => {
-	if (!pi.hasUI) return [];
 	return {
 		name: "plan",
 		label: "Plan",

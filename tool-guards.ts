@@ -1,6 +1,6 @@
 import { isCodeFile } from "./lib/code-files.ts";
 
-export const CHIEF_ALLOWED_TOOLS = new Set(["task", "todo", "ask", "irc", "job", "hub", "resolve", "memorysearch", "search_tool_bm25", "read", "plan"]);
+export const CHIEF_ALLOWED_TOOLS = new Set(["task", "todo", "ask", "irc", "job", "resolve", "memorysearch", "search_tool_bm25", "read", "plan"]);
 
 export const sessionPhase = new Map();
 

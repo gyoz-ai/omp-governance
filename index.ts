@@ -49,9 +49,10 @@ export default function (pi) {
 		const tool = event.toolName;
 		const args = event.input ?? {};
 
-		if (tool === "memorysearch") memorySearchCalled = true;
+		const xdTool = tool === "write" && String(args.path ?? "").startsWith("xd://") ? String(args.path).slice(5).split(/[/?#]/)[0] : "";
+		if (tool === "memorysearch" || xdTool === "memorysearch") memorySearchCalled = true;
 
-		if (ctx.hasUI && !CHIEF_ALLOWED_TOOLS.has(tool)) {
+		if (ctx.hasUI && !CHIEF_ALLOWED_TOOLS.has(tool) && !CHIEF_ALLOWED_TOOLS.has(xdTool)) {
 			return { block: true, reason: `BLOCKED: the chief is dispatch-only. '${tool}' must run inside a subagent — dispatch it via the 'task' tool (one unit of work per dispatch: reading, writing, running commands, and testing each get their own agent). Allowed chief tools: ${[...CHIEF_ALLOWED_TOOLS].join(", ")}.` };
 		}
 
@@ -60,8 +61,8 @@ export default function (pi) {
 				return { block: true, reason: "BLOCKED: rule #8 — call 'memorysearch' before dispatching any agent. Search for relevant past sessions first, then proceed." };
 			}
 			if (ctx.hasUI && sessionPhase.get(ctx.sessionManager?.getSessionId?.()) === "planning") {
-				const agent = String(args.agent ?? "");
-				if (agent !== "scout" && agent !== "librarian") {
+				const agents = Array.isArray(args.tasks) ? args.tasks.map((t) => String(t?.agent ?? "")) : [String(args.agent ?? "")];
+				if (agents.some((a) => a !== "scout" && a !== "librarian")) {
 					return { block: true, reason: "BLOCKED: plan-first — this session is in the PLANNING phase. Dispatch only 'scout' or 'librarian' agents to gather data. Keep gathering data, then draft and finalize the execution plan with the 'plan' tool ('plan' op 'draft', then op 'finalize'). Finalizing the plan unlocks executor dispatch." };
 				}
 			}
