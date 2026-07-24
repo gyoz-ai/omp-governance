@@ -1,24 +1,46 @@
 import { existsSync, readFileSync } from "node:fs";
 import { COMMON_RULES, ADHD_OUTPUT_STYLE, STE_TECHNICAL_ENGLISH, CHIEF_DELEGATION, EXECUTOR_CHECKLIST, VERIFICATION_CHECKLIST } from "./rules.ts";
-import { CHIEF_ALLOWED_TOOLS, countCommentLines, BANNED_TEST_MARKERS, editInputPaths, editAddedText, isCodeFile } from "./tool-guards.ts";
+import { CHIEF_ALLOWED_TOOLS, sessionPhase, countCommentLines, BANNED_TEST_MARKERS, editInputPaths, editAddedText, isCodeFile } from "./tool-guards.ts";
+import { typesenseFetch, sanitizeProject, PLAN_COLLECTION, PLAN_SCHEMA } from "./plan-tool.ts";
 
 export default function (pi) {
 	let memorySearchCalled = false;
 	const taskStack = [];
+	let project = "unknown";
+	let planFirstDisabled = false;
 
 	pi.setLabel?.("Governance");
 
-	pi.on("session_start", async (_event, _ctx) => {
+	pi.on("session_start", async (_event, ctx) => {
 		memorySearchCalled = false;
 		taskStack.length = 0;
+		project = sanitizeProject(ctx.cwd || process.cwd());
+		planFirstDisabled = false;
+		if (!ctx.hasUI) return;
+		const sessionId = ctx.sessionManager?.getSessionId?.();
+		try {
+			const existing = await typesenseFetch("/collections", "GET");
+			if (!Array.isArray(existing)) throw new Error("unexpected /collections response");
+			const names = new Set(existing.map((c) => c.name));
+			if (!names.has(PLAN_COLLECTION)) await typesenseFetch("/collections", "POST", PLAN_SCHEMA);
+			if (sessionId) sessionPhase.set(sessionId, "planning");
+		} catch {
+			planFirstDisabled = true;
+		}
 	});
 
 	pi.on("before_agent_start", async (event, ctx) => {
 		const blocks = [COMMON_RULES, ADHD_OUTPUT_STYLE, STE_TECHNICAL_ENGLISH];
 		if (ctx.hasUI) {
 			blocks.push(CHIEF_DELEGATION);
+			if (planFirstDisabled) blocks.push("<plan_first_status>\nWARNING: the plan store (Typesense) is unreachable. Plan-first enforcement is DISABLED for this session. You may dispatch executor agents directly. Start the plan-store container to restore plan-first gating.\n</plan_first_status>");
 		} else {
 			blocks.push(EXECUTOR_CHECKLIST);
+			try {
+				const res = await typesenseFetch(`/collections/${PLAN_COLLECTION}/documents/search?q=*&query_by=body&filter_by=project:=${project} && status:=final&sort_by=updated_at:desc&per_page=1&exclude_fields=embedding`, "GET");
+				const doc = res?.hits?.[0]?.document;
+				if (doc?.body) blocks.push(`<execution_plan>\nThe chief finalized this execution plan for the current work. Follow it for your slice.\n\n${doc.body}\n</execution_plan>`);
+			} catch {}
 		}
 		return { systemPrompt: [...event.systemPrompt, ...blocks] };
 	});
@@ -36,6 +58,12 @@ export default function (pi) {
 		if (tool === "task") {
 			if (ctx.hasUI && taskStack.length === 0 && !memorySearchCalled) {
 				return { block: true, reason: "BLOCKED: rule #8 — call 'memorysearch' before dispatching any agent. Search for relevant past sessions first, then proceed." };
+			}
+			if (ctx.hasUI && sessionPhase.get(ctx.sessionManager?.getSessionId?.()) === "planning") {
+				const agent = String(args.agent ?? "");
+				if (agent !== "scout" && agent !== "librarian") {
+					return { block: true, reason: "BLOCKED: plan-first — this session is in the PLANNING phase. Dispatch only 'scout' or 'librarian' agents to gather data. Keep gathering data, then draft and finalize the execution plan with the 'plan' tool ('plan' op 'draft', then op 'finalize'). Finalizing the plan unlocks executor dispatch." };
+				}
 			}
 			taskStack.push({ toolCallId: event.toolCallId });
 			return;

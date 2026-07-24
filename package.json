@@ -10,6 +10,7 @@
   "omp": {
     "version": "1.0.0",
     "description": "Enforces session-wide engineering rules: dispatch discipline, comment/test-marker bans, a Cargo.lock guard, and mandatory post-task verification.",
-    "extensions": ["index.ts"]
+    "extensions": ["index.ts"],
+    "tools": "plan-tool.ts"
   }
 }
